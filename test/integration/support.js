@@ -6,6 +6,9 @@ const runningQueries = new Map();
 const runningTransactions = new Map(); // map transaction option to queries.
 
 before(function() {
+  this.sequelize.addHook('transactionCreated', t => { // tracking race condition, remove me if no longer present.
+    t.trace = new Error().stack;
+  });
   this.sequelize.addHook('beforeQuery', (options, query, sql) => {
     runningQueries.set(query, options);
     if (options.transaction) {
